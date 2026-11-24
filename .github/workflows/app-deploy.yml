@@ -36,7 +36,7 @@ jobs:
       - name: Smoke test
         run: |
           for i in $(seq 1 10); do
-            if curl -fsS "http://${{ vars.APP_DNS_LABEL }}.${{ vars.AZURE_LOCATION || 'eastus' }}.cloudapp.azure.com/health"; then exit 0; fi
+            if curl -fsS "http://${{ vars.APP_DNS_LABEL }}.${{ vars.AZURE_LOCATION || 'centralindia' }}.cloudapp.azure.com/health"; then exit 0; fi
             sleep 6
           done
           exit 1

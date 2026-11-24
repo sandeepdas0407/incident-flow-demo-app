@@ -5,7 +5,7 @@ variable "prefix" {
 
 variable "location" {
   type    = string
-  default = "eastus"
+  default = "centralindia"
 }
 
 variable "vm_size" {
