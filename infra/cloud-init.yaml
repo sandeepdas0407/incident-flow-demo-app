@@ -29,18 +29,6 @@ write_files:
           proxy_set_header Host $host;
         }
       }
-  - path: /usr/local/bin/deploy-app
-    permissions: "0755"
-    content: |
-      #!/bin/bash
-      # Invoked by GitHub Actions (az vm run-command) after a merge to main.
-      set -euo pipefail
-      git config --global --add safe.directory /opt/app
-      git -C /opt/app fetch --depth 1 origin main
-      git -C /opt/app reset --hard origin/main
-      /opt/venv/bin/pip install -q -r /opt/app/app/requirements.txt
-      systemctl restart contoso-orders
-      echo "deployed $(git -C /opt/app rev-parse --short HEAD)"
 
 runcmd:
   - git clone --depth 1 ${repo_url} /opt/app

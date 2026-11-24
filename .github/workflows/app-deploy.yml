@@ -3,7 +3,7 @@ name: app-deploy
 on:
   push:
     branches: [main]
-    paths: ["app/**"]
+    paths: ["app/**", "deploy/**", ".github/workflows/app-deploy.yml"]
   workflow_dispatch:
 
 permissions:
@@ -11,7 +11,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: app-deploy
+  # shared with terraform-apply: never deploy to a VM that Terraform is resizing/rebooting
+  group: azure-vm
   cancel-in-progress: false
 
 jobs:
@@ -19,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - uses: actions/checkout@v4
       - uses: azure/login@v2
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
@@ -30,9 +32,9 @@ jobs:
             --resource-group "${{ vars.APP_RESOURCE_GROUP }}" \
             --name "${{ vars.APP_VM_NAME }}" \
             --command-id RunShellScript \
-            --scripts "/usr/local/bin/deploy-app" \
+            --scripts @deploy/deploy-app.sh \
             --query "value[0].message" -o tsv | tee deploy.log
-          grep -q "deployed" deploy.log
+          grep -q "^deployed " deploy.log
       - name: Smoke test
         run: |
           for i in $(seq 1 10); do
