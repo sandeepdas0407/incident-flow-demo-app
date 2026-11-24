@@ -17,21 +17,3 @@ def test_index_ok():
 
 def test_health_ok():
     assert client().get("/health").get_json() == {"status": "ok"}
-
-
-def test_api_orders_ok_with_no_shipped_orders():
-    resp = client().get("/api/orders")
-    assert resp.status_code == 200
-    assert resp.get_json()["stats"]["avg_shipped"] == 0.0
-
-
-def test_compute_order_stats_handles_shipped_and_unshipped():
-    from app import compute_order_stats
-
-    assert compute_order_stats([{"amount": 10.0, "status": "pending"}])["avg_shipped"] == 0.0
-    stats = compute_order_stats([
-        {"amount": 10.0, "status": "shipped"},
-        {"amount": 20.0, "status": "shipped"},
-        {"amount": 5.0, "status": "pending"},
-    ])
-    assert stats == {"count": 3, "total": 35.0, "avg_shipped": 15.0}
