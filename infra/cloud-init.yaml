@@ -1,0 +1,51 @@
+#cloud-config
+package_update: true
+packages:
+  - nginx
+  - git
+  - python3-venv
+
+write_files:
+  - path: /etc/systemd/system/contoso-orders.service
+    content: |
+      [Unit]
+      Description=Contoso Orders (gunicorn)
+      After=network.target
+
+      [Service]
+      WorkingDirectory=/opt/app/app
+      ExecStart=/opt/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 app:app
+      Restart=always
+      User=www-data
+
+      [Install]
+      WantedBy=multi-user.target
+  - path: /etc/nginx/sites-available/default
+    content: |
+      server {
+        listen 80 default_server;
+        location / {
+          proxy_pass http://127.0.0.1:8000;
+          proxy_set_header Host $host;
+        }
+      }
+  - path: /usr/local/bin/deploy-app
+    permissions: "0755"
+    content: |
+      #!/bin/bash
+      # Invoked by GitHub Actions (az vm run-command) after a merge to main.
+      set -euo pipefail
+      git config --global --add safe.directory /opt/app
+      git -C /opt/app fetch --depth 1 origin main
+      git -C /opt/app reset --hard origin/main
+      /opt/venv/bin/pip install -q -r /opt/app/app/requirements.txt
+      systemctl restart contoso-orders
+      echo "deployed $(git -C /opt/app rev-parse --short HEAD)"
+
+runcmd:
+  - git clone --depth 1 ${repo_url} /opt/app
+  - python3 -m venv /opt/venv
+  - /opt/venv/bin/pip install -r /opt/app/app/requirements.txt
+  - systemctl daemon-reload
+  - systemctl enable --now contoso-orders
+  - systemctl restart nginx

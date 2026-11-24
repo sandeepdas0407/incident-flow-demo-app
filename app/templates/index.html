@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contoso Orders</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="card">
+    <h1>Contoso Orders</h1>
+    <p class="sub">Demo application managed by Incident Flow agents</p>
+    <table>
+      <thead><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for o in orders %}
+        <tr><td>{{ o.id }}</td><td>{{ o.customer }}</td><td>${{ '%.2f'|format(o.amount) }}</td><td>{{ o.status }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

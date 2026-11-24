@@ -1,0 +1,56 @@
+name: terraform-plan
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ["infra/**"]
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+  ARM_USE_OIDC: "true"
+  TF_VAR_admin_ssh_public_key: ${{ vars.VM_SSH_PUBLIC_KEY }}
+  TF_VAR_dns_label: ${{ vars.APP_DNS_LABEL }}
+  TF_VAR_app_repo_url: ${{ github.server_url }}/${{ github.repository }}.git
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - name: Init
+        run: >
+          terraform init -input=false
+          -backend-config="resource_group_name=${{ vars.TFSTATE_RG }}"
+          -backend-config="storage_account_name=${{ vars.TFSTATE_ACCOUNT }}"
+          -backend-config="container_name=tfstate"
+          -backend-config="key=incidentflow.tfstate"
+      - run: terraform fmt -check
+      - run: terraform validate
+      - name: Plan
+        run: terraform plan -input=false -no-color -out=tfplan | tee plan.txt
+      - name: Comment plan on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let plan = fs.readFileSync('infra/plan.txt', 'utf8');
+            if (plan.length > 60000) plan = plan.slice(-60000);
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '### Terraform plan\n```\n' + plan + '\n```'
+            });
