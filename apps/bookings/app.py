@@ -19,8 +19,17 @@ def with_weekday(bookings):
     """Add the weekday name to each booking for the calendar view."""
     out = []
     for b in bookings:
-        day = datetime.strptime(b["date"], "%Y-%m-%d")
-        out.append({**b, "weekday": day.strftime("%A")})
+        day = None
+        for fmt in ("%Y-%m-%d", "%d/%m/%Y"):  # ISO first, then legacy dd/mm/yyyy
+            try:
+                day = datetime.strptime(b["date"], fmt)
+                break
+            except ValueError:
+                continue
+        if day is None:
+            out.append(dict(b))
+        else:
+            out.append({**b, "weekday": day.strftime("%A")})
     return out
 
 
