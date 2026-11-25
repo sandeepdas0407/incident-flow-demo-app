@@ -9,9 +9,9 @@ from flask import Flask, jsonify, render_template
 app = Flask(__name__)
 
 BOOKINGS = [
-    {"id": 501, "room": "Everest", "owner": "Fabrikam", "date": "2026-12-01"},
-    {"id": 502, "room": "Kilimanjaro", "owner": "Northwind", "date": "2026-12-03"},
-    {"id": 503, "room": "Denali", "owner": "Tailspin", "date": "04/12/2026"},  # imported from the legacy system
+    {"id": 101, "room": "Everest", "owner": "Fabrikam", "date": "2026-12-01"},
+    {"id": 102, "room": "Kilimanjaro", "owner": "Northwind", "date": "2026-12-03"},
+    {"id": 103, "room": "Denali", "owner": "Tailspin", "date": "04/12/2026"},  # imported from the legacy system
 ]
 
 
