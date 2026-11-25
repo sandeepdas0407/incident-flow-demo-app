@@ -46,6 +46,8 @@ variable "app_repo_url" {
 variable "tags" {
   type = map(string)
   default = {
-    project = "incident-flow-demo"
+    project         = "incident-flow-demo"
+    "cost-center"   = "FIN-PILOT-042"
+    "billing-owner" = "finance-ops"
   }
 }
