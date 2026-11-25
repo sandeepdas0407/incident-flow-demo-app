@@ -15,11 +15,7 @@ ITEMS = [
 
 def low_stock(items):
     """SKUs whose quantity is below their reorder level."""
-    return [
-        i["sku"]
-        for i in items
-        if i.get("reorder_level") is not None and i["qty"] < i["reorder_level"]
-    ]
+    return [i["sku"] for i in items if i["qty"] < i["reorder_level"]]
 
 
 @app.route("/")
