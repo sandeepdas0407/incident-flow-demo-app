@@ -49,3 +49,29 @@ def test_index_shows_renumbered_booking_ids():
     for old_id in (501, 502, 503):
         assert f"<td>{old_id}</td>" not in tbody
     assert tbody.index("<td>101</td>") < tbody.index("<td>102</td>") < tbody.index("<td>103</td>")
+
+
+def test_api_bookings_ok_with_renumbered_ids_in_order():
+    resp = client().get("/api/bookings")
+    assert resp.status_code == 200
+    bookings = resp.get_json()["bookings"]
+    assert [b["id"] for b in bookings] == [101, 102, 103]
+    assert [(b["room"], b["owner"], b["date"]) for b in bookings] == [
+        ("Everest", "Fabrikam", "2026-12-01"),
+        ("Kilimanjaro", "Northwind", "2026-12-03"),
+        ("Denali", "Tailspin", "04/12/2026"),
+    ]
+
+
+def test_with_weekday_parses_legacy_date_as_day_month_year():
+    from app import with_weekday
+
+    out = with_weekday([{"id": 103, "date": "04/12/2026"}])
+    assert out[0]["weekday"] == "Friday"
+
+
+def test_with_weekday_skips_unparseable_date():
+    from app import with_weekday
+
+    out = with_weekday([{"id": 1, "date": "not a date"}])
+    assert out == [{"id": 1, "date": "not a date"}]
