@@ -9,9 +9,9 @@ from flask import Flask, jsonify, render_template
 app = Flask(__name__)
 
 BOOKINGS = [
-    {"id": 101, "room": "Everest", "owner": "Fabrikam", "date": "2026-12-01"},
-    {"id": 102, "room": "Kilimanjaro", "owner": "Northwind", "date": "2026-12-03"},
-    {"id": 103, "room": "Denali", "owner": "Tailspin", "date": "04/12/2026"},  # imported from the legacy system
+    {"id": 501, "room": "Everest", "owner": "Fabrikam", "date": "2026-12-01"},
+    {"id": 502, "room": "Kilimanjaro", "owner": "Northwind", "date": "2026-12-03"},
+    {"id": 503, "room": "Denali", "owner": "Tailspin", "date": "04/12/2026"},  # imported from the legacy system
 ]
 
 
@@ -19,17 +19,8 @@ def with_weekday(bookings):
     """Add the weekday name to each booking for the calendar view."""
     out = []
     for b in bookings:
-        day = None
-        for fmt in ("%Y-%m-%d", "%d/%m/%Y"):  # ISO first, then legacy dd/mm/yyyy
-            try:
-                day = datetime.strptime(b["date"], fmt)
-                break
-            except ValueError:
-                continue
-        if day is None:
-            out.append(dict(b))
-        else:
-            out.append({**b, "weekday": day.strftime("%A")})
+        day = datetime.strptime(b["date"], "%Y-%m-%d")
+        out.append({**b, "weekday": day.strftime("%A")})
     return out
 
 
