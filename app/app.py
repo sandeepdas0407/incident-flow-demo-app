@@ -18,7 +18,7 @@ def compute_order_stats(orders):
     shipped = [o for o in orders if o["status"] == "shipped"]
     total = sum(o["amount"] for o in orders)
     # BUG: when no orders have shipped yet this divides by zero -> HTTP 500
-    avg_shipped = sum(o["amount"] for o in shipped) / len(shipped)
+    avg_shipped = sum(o["amount"] for o in shipped) / len(shipped) if shipped else 0.0
     return {"count": len(orders), "total": round(total, 2), "avg_shipped": round(avg_shipped, 2)}
 
 
