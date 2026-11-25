@@ -1,1 +1,1 @@
-vm_size = "Standard_B1s"
+vm_size = "Standard_B2s"
