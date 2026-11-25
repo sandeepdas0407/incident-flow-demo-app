@@ -1,7 +1,6 @@
-"""Contoso Orders - a tiny demo app deployed on an Azure VM.
+"""Contoso Orders - customer orders and order statistics.
 
-It intentionally contains a seeded bug in /api/orders (see compute_order_stats)
-so the Incident Flow agent has something real to diagnose and fix.
+Pilot app (1 of 3) managed by the Incident Flow AI Ops agents. Served on port 80.
 """
 from flask import Flask, jsonify, render_template
 
@@ -17,8 +16,7 @@ ORDERS = [
 def compute_order_stats(orders):
     shipped = [o for o in orders if o["status"] == "shipped"]
     total = sum(o["amount"] for o in orders)
-    # BUG: when no orders have shipped yet this divides by zero -> HTTP 500
-    avg_shipped = sum(o["amount"] for o in shipped) / len(shipped) if shipped else 0.0
+    avg_shipped = sum(o["amount"] for o in shipped) / len(shipped)
     return {"count": len(orders), "total": round(total, 2), "avg_shipped": round(avg_shipped, 2)}
 
 

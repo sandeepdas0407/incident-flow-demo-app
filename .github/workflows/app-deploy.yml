@@ -3,7 +3,7 @@ name: app-deploy
 on:
   push:
     branches: [main]
-    paths: ["app/**", "deploy/**", ".github/workflows/app-deploy.yml"]
+    paths: ["apps/**", "deploy/**", ".github/workflows/app-deploy.yml"]
   workflow_dispatch:
 
 permissions:
@@ -35,7 +35,7 @@ jobs:
             --scripts @deploy/deploy-app.sh \
             --query "value[0].message" -o tsv | tee deploy.log
           grep -q "^deployed " deploy.log
-      - name: Smoke test
+      - name: Smoke test (port 80; the script health-checks every app on the VM)
         run: |
           for i in $(seq 1 10); do
             if curl -fsS "http://${{ vars.APP_DNS_LABEL }}.${{ vars.AZURE_LOCATION || 'centralindia' }}.cloudapp.azure.com/health"; then exit 0; fi
