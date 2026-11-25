@@ -29,3 +29,23 @@ def test_index_shows_total_bookings_under_heading():
     assert after_heading.startswith(f'<p class="total">{line}</p>')
     tbody = html.split("<tbody>", 1)[1].split("</tbody>", 1)[0]
     assert tbody.count("<tr>") == len(BOOKINGS)
+
+
+def test_booking_ids_renumbered_in_same_order_with_details_unchanged():
+    from app import BOOKINGS
+
+    assert BOOKINGS == [
+        {"id": 101, "room": "Everest", "owner": "Fabrikam", "date": "2026-12-01"},
+        {"id": 102, "room": "Kilimanjaro", "owner": "Northwind", "date": "2026-12-03"},
+        {"id": 103, "room": "Denali", "owner": "Tailspin", "date": "04/12/2026"},
+    ]
+
+
+def test_index_shows_renumbered_booking_ids():
+    html = client().get("/").get_data(as_text=True)
+    tbody = html.split("<tbody>", 1)[1].split("</tbody>", 1)[0]
+    for new_id in (101, 102, 103):
+        assert f"<td>{new_id}</td>" in tbody
+    for old_id in (501, 502, 503):
+        assert f"<td>{old_id}</td>" not in tbody
+    assert tbody.index("<td>101</td>") < tbody.index("<td>102</td>") < tbody.index("<td>103</td>")
