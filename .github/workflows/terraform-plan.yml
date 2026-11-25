@@ -3,7 +3,7 @@ name: terraform-plan
 on:
   pull_request:
     branches: [main]
-    paths: ["infra/**"]
+    paths: ["infra/**", ".github/workflows/terraform-plan.yml"]
 
 permissions:
   id-token: write
@@ -55,3 +55,15 @@ jobs:
               issue_number: context.issue.number,
               body: '### Terraform plan\n```\n' + plan + '\n```'
             });
+      - name: Block destroy / replace
+        # Agent-proposed infra changes must never delete or recreate resources. A failing check makes the
+        # Incident Flow agent hand the ticket to a person; the PR stays open for them to decide.
+        run: |
+          terraform show -json tfplan > plan.json
+          destroy=$(jq -r '.resource_changes[]? | select(.change.actions | index("delete")) | .address' plan.json)
+          if [ -n "$destroy" ]; then
+            echo "::error::This plan would destroy or replace resources: $(echo $destroy)"
+            { echo "### Blocked: plan destroys or replaces resources"; echo '```'; echo "$destroy"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "No resources destroyed or replaced."
