@@ -17,3 +17,12 @@ def test_index_ok():
 
 def test_health_ok():
     assert client().get("/health").get_json() == {"status": "ok"}
+
+
+def test_api_stock_handles_missing_reorder_level():
+    resp = client().get("/api/stock")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert "GAD-220" in data["low_stock"]
+    assert "WID-100" not in data["low_stock"]
+    assert "SPR-310" not in data["low_stock"]
