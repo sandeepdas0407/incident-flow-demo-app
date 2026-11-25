@@ -3,37 +3,11 @@ package_update: true
 packages:
   - nginx
   - git
+  - curl
   - python3-venv
 
-write_files:
-  - path: /etc/systemd/system/contoso-orders.service
-    content: |
-      [Unit]
-      Description=Contoso Orders (gunicorn)
-      After=network.target
-
-      [Service]
-      WorkingDirectory=/opt/app/app
-      ExecStart=/opt/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 app:app
-      Restart=always
-      User=www-data
-
-      [Install]
-      WantedBy=multi-user.target
-  - path: /etc/nginx/sites-available/default
-    content: |
-      server {
-        listen 80 default_server;
-        location / {
-          proxy_pass http://127.0.0.1:8000;
-          proxy_set_header Host $host;
-        }
-      }
-
+# First boot only. After that, app-deploy.yml runs deploy/deploy-app.sh on every merge.
 runcmd:
   - git clone --depth 1 ${repo_url} /opt/app
   - python3 -m venv /opt/venv
-  - /opt/venv/bin/pip install -r /opt/app/app/requirements.txt
-  - systemctl daemon-reload
-  - systemctl enable --now contoso-orders
-  - systemctl restart nginx
+  - bash /opt/app/deploy/deploy-app.sh

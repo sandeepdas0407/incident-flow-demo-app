@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contoso Inventory</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="card">
+    <h1>Contoso Inventory</h1>
+    <p class="sub">Warehouse stock levels · pilot app managed by Incident Flow agents</p>
+    <table>
+      <thead><tr><th>SKU</th><th>Item</th><th>Qty</th><th>Reorder level</th></tr></thead>
+      <tbody>
+      {% for i in items %}
+        <tr><td>{{ i.sku }}</td><td>{{ i.name }}</td><td>{{ i.qty }}</td><td>{{ i.reorder_level or '—' }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

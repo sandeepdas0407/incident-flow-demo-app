@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contoso Bookings</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="card">
+    <h1>Contoso Bookings</h1>
+    <p class="sub">Meeting room reservations · pilot app managed by Incident Flow agents</p>
+    <table>
+      <thead><tr><th>ID</th><th>Room</th><th>Booked by</th><th>Date</th></tr></thead>
+      <tbody>
+      {% for b in bookings %}
+        <tr><td>{{ b.id }}</td><td>{{ b.room }}</td><td>{{ b.owner }}</td><td>{{ b.date }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

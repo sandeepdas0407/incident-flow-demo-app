@@ -53,6 +53,18 @@ resource "azurerm_network_security_group" "nsg" {
   }
 
   security_rule {
+    name                       = "pilot-apps"
+    priority                   = 105
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_ranges    = ["8081", "8082"]
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
     name                       = "ssh"
     priority                   = 110
     direction                  = "Inbound"
